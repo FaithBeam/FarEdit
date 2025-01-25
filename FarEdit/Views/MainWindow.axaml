@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:mainWindowViewModel="clr-namespace:FarEdit.Core.ViewModels.MainWindowViewModel;assembly=FarEdit.Core"
+        xmlns:converters="clr-namespace:FarEdit.Converters"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="FarEdit.Views.MainWindow"
         x:DataType="mainWindowViewModel:MainWindowViewModel"
@@ -14,6 +15,10 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <mainWindowViewModel:MainWindowViewModel/>
     </Design.DataContext>
+    
+    <Window.Resources>
+        <converters:FarFileVmConverter x:Key="FarFileVmConverter" />
+    </Window.Resources>
 
     <DockPanel>
         <Menu DockPanel.Dock="Top">
@@ -31,15 +36,15 @@
                 <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding FarPath}" />
                 
                 <Label Grid.Row="0" Grid.Column="1" Content="Entries"/>
-                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding FarVm.Files.Count}" />
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding FarFiles.Count}" />
             </Grid>
             <Grid Grid.Row="2" ColumnDefinitions="*,*">
                 <Grid RowDefinitions="Auto,*">
                     <Grid ColumnDefinitions="*,*">
                         <Label Content="Files in archive" />
-                        <TextBox Grid.Column="1" />
+                        <TextBox Grid.Column="1" Text="{Binding EntryFilter}" />
                     </Grid>
-                    <ListBox Grid.Row="1" ItemsSource="{Binding FarVm.Files}" SelectedItem="{Binding SelectedFarFileVm}">
+                    <ListBox Grid.Row="1" ItemsSource="{Binding FarFiles}" SelectedItem="{Binding SelectedFarFileVm}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Name}" />
@@ -50,7 +55,8 @@
                 <Grid Grid.Column="1" RowDefinitions="Auto,*">
                     <Grid RowDefinitions="Auto,*">
                         <Label Content="Selected Entry Data" />
-                        <TextBlock Grid.Row="1"></TextBlock>
+                        <TextBlock Grid.Row="1" Text="HELLO" IsVisible="{Binding !IsImage}"></TextBlock>
+                        <Image Grid.Row="1" Source="{Binding SelectedFarFileVm, Converter={StaticResource FarFileVmConverter}, ConverterParameter='image'}" IsVisible="{Binding IsImage}"></Image>
                     </Grid>
                 </Grid>
             </Grid>

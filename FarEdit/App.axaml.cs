@@ -19,6 +19,7 @@ namespace FarEdit;
 public partial class App : Application
 {
     public IServiceProvider? Container { get; private set; }
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -37,7 +38,7 @@ public partial class App : Application
 
         base.OnFrameworkInitializationCompleted();
     }
-    
+
     private void Init()
     {
         // var configuration = new ConfigurationBuilder()

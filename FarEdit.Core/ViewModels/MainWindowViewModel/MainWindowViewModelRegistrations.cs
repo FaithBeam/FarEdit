@@ -1,5 +1,6 @@
 ﻿using FarEdit.Core.ViewModels.MainWindowViewModel.Queries;
 using Microsoft.Extensions.DependencyInjection;
+
 namespace FarEdit.Core.ViewModels.MainWindowViewModel;
 
 public static class MainWindowViewModelRegistrations
