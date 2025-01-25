@@ -1,0 +1,59 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:mainWindowViewModel="clr-namespace:FarEdit.Core.ViewModels.MainWindowViewModel;assembly=FarEdit.Core"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="FarEdit.Views.MainWindow"
+        x:DataType="mainWindowViewModel:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="FarEdit">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <mainWindowViewModel:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Open"></MenuItem>
+                <MenuItem Header="_Save"></MenuItem>
+                <MenuItem Header="_Exit"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="_Entries"></MenuItem>
+        </Menu>
+        <Grid RowDefinitions="Auto,Auto,*">
+            <Label Grid.Row="0" Content="ICONSTBD" />
+            <Grid Grid.Row="1" RowDefinitions="*,*" ColumnDefinitions="*,*">
+                <Label Grid.Row="0" Grid.Column="0" Content="Current Far File" />
+                <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding FarPath}" />
+                
+                <Label Grid.Row="0" Grid.Column="1" Content="Entries"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding FarVm.Files.Count}" />
+            </Grid>
+            <Grid Grid.Row="2" ColumnDefinitions="*,*">
+                <Grid RowDefinitions="Auto,*">
+                    <Grid ColumnDefinitions="*,*">
+                        <Label Content="Files in archive" />
+                        <TextBox Grid.Column="1" />
+                    </Grid>
+                    <ListBox Grid.Row="1" ItemsSource="{Binding FarVm.Files}" SelectedItem="{Binding SelectedFarFileVm}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+                <Grid Grid.Column="1" RowDefinitions="Auto,*">
+                    <Grid RowDefinitions="Auto,*">
+                        <Label Content="Selected Entry Data" />
+                        <TextBlock Grid.Row="1"></TextBlock>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Grid>
+    </DockPanel>
+</Window>
