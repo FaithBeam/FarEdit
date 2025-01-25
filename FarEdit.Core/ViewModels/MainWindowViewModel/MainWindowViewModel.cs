@@ -56,7 +56,10 @@ public class MainWindowViewModel : ViewModelBase
             );
         _isImage = this.WhenAnyValue(x => x.SelectedFarFileVm)
             .WhereNotNull()
-            .Select(x => x.Name.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase))
+            .Select(x =>
+                x.Name.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase)
+                || x.Name.EndsWith(".tga", StringComparison.OrdinalIgnoreCase)
+            )
             .ToProperty(this, x => x.IsImage);
 
         OpenFileInteraction = new Interaction<Unit, string?>();

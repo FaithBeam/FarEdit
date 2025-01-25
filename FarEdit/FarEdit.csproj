@@ -27,6 +27,7 @@
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.3"/>
         <PackageReference Include="AvaloniaHex" Version="0.1.6" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.6" />
         <PackageReference Include="Splat.Microsoft.Extensions.DependencyInjection" Version="15.2.22" />
     </ItemGroup>
 
