@@ -4,6 +4,7 @@ using System.IO;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Media.Imaging;
+using AvaloniaHex.Document;
 using FarEdit.Core.ViewModels.MainWindowViewModel.Queries;
 
 namespace FarEdit.Converters;
@@ -20,6 +21,11 @@ public class FarFileVmConverter : IValueConverter
         if (para == "image" && vm.Name.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase))
         {
             return new Bitmap(new MemoryStream(vm.Data));
+        }
+
+        if (para == "data" && !vm.Name.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase))
+        {
+            return new MemoryBinaryDocument(vm.Data);
         }
 
         return null;

@@ -4,6 +4,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:mainWindowViewModel="clr-namespace:FarEdit.Core.ViewModels.MainWindowViewModel;assembly=FarEdit.Core"
         xmlns:converters="clr-namespace:FarEdit.Converters"
+        xmlns:avaloniaHex="clr-namespace:AvaloniaHex;assembly=AvaloniaHex"
+        xmlns:rendering="clr-namespace:AvaloniaHex.Rendering;assembly=AvaloniaHex"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="FarEdit.Views.MainWindow"
         x:DataType="mainWindowViewModel:MainWindowViewModel"
@@ -52,13 +54,17 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
                 </Grid>
-                <Grid Grid.Column="1" RowDefinitions="Auto,*">
-                    <Grid RowDefinitions="Auto,*">
+                    <Grid Grid.Column="1" RowDefinitions="Auto,*">
                         <Label Content="Selected Entry Data" />
-                        <TextBlock Grid.Row="1" Text="HELLO" IsVisible="{Binding !IsImage}"></TextBlock>
+                        <avaloniaHex:HexEditor Grid.Row="1" x:Name="MainHexEditor" FontFamily="Courier New" Document="{Binding SelectedFarFileVm, Converter={StaticResource FarFileVmConverter}, ConverterParameter='data'}">
+                            <avaloniaHex:HexEditor.Columns>
+                                <rendering:OffsetColumn />
+                                <rendering:HexColumn />
+                                <rendering:AsciiColumn />
+                            </avaloniaHex:HexEditor.Columns>
+                        </avaloniaHex:HexEditor>
                         <Image Grid.Row="1" Source="{Binding SelectedFarFileVm, Converter={StaticResource FarFileVmConverter}, ConverterParameter='image'}" IsVisible="{Binding IsImage}"></Image>
                     </Grid>
-                </Grid>
             </Grid>
         </Grid>
     </DockPanel>
