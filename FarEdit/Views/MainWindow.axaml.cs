@@ -22,11 +22,18 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         {
             if (ViewModel is null)
             {
-                return;
+                return; 
             }
 
             ViewModel.OpenFileInteraction.RegisterHandler(ShowOpenFileDialog).DisposeWith(d);
+            ViewModel.SaveAsInteraction.RegisterHandler(ShowSaveAsDialog).DisposeWith(d);
         });
+    }
+
+    private async Task ShowSaveAsDialog(IInteractionContext<Unit, string?> arg)
+    {
+        // TODO
+        var result = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions());
     }
 
     private async Task ShowOpenFileDialog(IInteractionContext<Unit, string?> ctx)

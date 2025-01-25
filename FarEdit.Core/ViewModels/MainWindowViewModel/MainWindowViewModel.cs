@@ -3,6 +3,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
 using DynamicData.Binding;
+using FarEdit.Core.ViewModels.MainWindowViewModel.Commands;
 using FarEdit.Core.ViewModels.MainWindowViewModel.Queries;
 using ReactiveUI;
 
@@ -29,8 +30,11 @@ public class MainWindowViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, string?> OpenFileCmd { get; }
     public IInteraction<Unit, string?> OpenFileInteraction { get; }
+    public ReactiveCommand<Unit, Unit> SaveCommand { get; }
+    public ReactiveCommand<Unit, string?> SaveAsCommand { get; }
+    public IInteraction<Unit, string?> SaveAsInteraction { get; }
 
-    public MainWindowViewModel(GetFarFiles.Handler getFarFilesHandler)
+    public MainWindowViewModel(GetFarFiles.Handler getFarFilesHandler, Save.Handler saveHandler)
     {
         var dynamicEntryFilter = this.WhenAnyValue(x => x.EntryFilter)
             .Select(CreateEntryFilterPredicate);
@@ -67,6 +71,21 @@ public class MainWindowViewModel : ViewModelBase
             async () => await OpenFileInteraction.Handle(Unit.Default)
         );
         _farPath = OpenFileCmd.ToProperty(this, x => x.FarPath);
+
+        var canSave = this.WhenAnyValue(
+            x => x.FarFiles,
+            property2: x => x.FarPath,
+            selector: (farFiles, farPath) => farFiles.Any() && !string.IsNullOrWhiteSpace(farPath)
+        );
+        SaveCommand = ReactiveCommand.Create(
+            () => saveHandler.Execute(new Save.Command(FarPath!, FarFiles)),
+            canSave
+        );
+
+        SaveAsInteraction = new Interaction<Unit, string?>();
+        SaveAsCommand = ReactiveCommand.CreateFromTask(
+            async () => await SaveAsInteraction.Handle(Unit.Default)
+        );
     }
 
     private static Func<GetFarFiles.FarFileVm, bool> CreateEntryFilterPredicate(string? txt)

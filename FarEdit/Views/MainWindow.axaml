@@ -24,11 +24,11 @@
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
                 <MenuItem Header="_Open" Command="{Binding OpenFileCmd}" />
-                <MenuItem Header="_Create Backup"  />
-                <MenuItem Header="_Save"></MenuItem>
-                <MenuItem x:Name="MenuItemExit" Header="_Exit" Click="MenuItemExit_OnClick"></MenuItem>
+                <MenuItem Header="_Save" Command="{Binding SaveCommand}" />
+                <MenuItem Header="_Save As" Command="{Binding SaveAsCommand}" />
+                <MenuItem x:Name="MenuItemExit" Header="_Exit" Click="MenuItemExit_OnClick" />
             </MenuItem>
-            <MenuItem Header="_Entries"></MenuItem>
+            <MenuItem Header="_Entries" />
         </Menu>
         <Grid RowDefinitions="Auto,Auto,*">
             <Label Grid.Row="0" Content="ICONSTBD" />
