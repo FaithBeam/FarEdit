@@ -24,9 +24,9 @@
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
                 <MenuItem Header="_Open" Command="{Binding OpenFileCmd}" />
-                <MenuItem Header="_Create Backup" />
+                <MenuItem Header="_Create Backup"  />
                 <MenuItem Header="_Save"></MenuItem>
-                <MenuItem Header="_Exit"></MenuItem>
+                <MenuItem x:Name="MenuItemExit" Header="_Exit" Click="MenuItemExit_OnClick"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Entries"></MenuItem>
         </Menu>

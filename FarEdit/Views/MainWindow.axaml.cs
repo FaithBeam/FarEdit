@@ -4,6 +4,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Avalonia.ReactiveUI;
 using FarEdit.Core.ViewModels.MainWindowViewModel;
@@ -39,5 +40,10 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             }
         );
         ctx.SetOutput(result[0].TryGetLocalPath());
+    }
+
+    private void MenuItemExit_OnClick(object? sender, RoutedEventArgs e)
+    {
+        Close();
     }
 }
