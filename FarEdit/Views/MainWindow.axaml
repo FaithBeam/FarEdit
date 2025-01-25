@@ -13,11 +13,9 @@
         Title="FarEdit">
 
     <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <mainWindowViewModel:MainWindowViewModel/>
+        <mainWindowViewModel:MainWindowViewModel />
     </Design.DataContext>
-    
+
     <Window.Resources>
         <converters:FarFileVmConverter x:Key="FarFileVmConverter" />
     </Window.Resources>
@@ -25,7 +23,8 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_Open"></MenuItem>
+                <MenuItem Header="_Open" Command="{Binding OpenFileCmd}" />
+                <MenuItem Header="_Create Backup" />
                 <MenuItem Header="_Save"></MenuItem>
                 <MenuItem Header="_Exit"></MenuItem>
             </MenuItem>
@@ -35,10 +34,10 @@
             <Label Grid.Row="0" Content="ICONSTBD" />
             <Grid Grid.Row="1" RowDefinitions="*,*" ColumnDefinitions="*,*">
                 <Label Grid.Row="0" Grid.Column="0" Content="Current Far File" />
-                <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding FarPath}" />
-                
-                <Label Grid.Row="0" Grid.Column="1" Content="Entries"/>
-                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding FarFiles.Count}" />
+                <TextBox Grid.Row="1" Grid.Column="0" IsReadOnly="True" Text="{Binding FarPath, Mode=OneWay}" />
+
+                <Label Grid.Row="0" Grid.Column="1" Content="Entries" />
+                <TextBox Grid.Row="1" Grid.Column="1" IsReadOnly="True" Text="{Binding FarFiles.Count}" />
             </Grid>
             <Grid Grid.Row="2" ColumnDefinitions="*,*">
                 <Grid RowDefinitions="Auto,*">
@@ -54,17 +53,21 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
                 </Grid>
-                    <Grid Grid.Column="1" RowDefinitions="Auto,*">
-                        <Label Content="Selected Entry Data" />
-                        <avaloniaHex:HexEditor Grid.Row="1" x:Name="MainHexEditor" FontFamily="Courier New" Document="{Binding SelectedFarFileVm, Converter={StaticResource FarFileVmConverter}, ConverterParameter='data'}">
-                            <avaloniaHex:HexEditor.Columns>
-                                <rendering:OffsetColumn />
-                                <rendering:HexColumn />
-                                <rendering:AsciiColumn />
-                            </avaloniaHex:HexEditor.Columns>
-                        </avaloniaHex:HexEditor>
-                        <Image Grid.Row="1" Source="{Binding SelectedFarFileVm, Converter={StaticResource FarFileVmConverter}, ConverterParameter='image'}" IsVisible="{Binding IsImage}"></Image>
-                    </Grid>
+                <Grid Grid.Column="1" RowDefinitions="Auto,*">
+                    <Label Content="Selected Entry Data" />
+                    <avaloniaHex:HexEditor Grid.Row="1" x:Name="MainHexEditor" FontFamily="Courier New"
+                                           Document="{Binding SelectedFarFileVm, Converter={StaticResource FarFileVmConverter}, ConverterParameter='data'}">
+                        <avaloniaHex:HexEditor.Columns>
+                            <rendering:OffsetColumn />
+                            <rendering:HexColumn />
+                            <rendering:AsciiColumn />
+                        </avaloniaHex:HexEditor.Columns>
+                    </avaloniaHex:HexEditor>
+                    <Image Grid.Row="1"
+                           Source="{Binding SelectedFarFileVm, Converter={StaticResource FarFileVmConverter}, ConverterParameter='image'}"
+                           IsVisible="{Binding IsImage}">
+                    </Image>
+                </Grid>
             </Grid>
         </Grid>
     </DockPanel>

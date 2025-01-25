@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
 using DynamicData.Binding;
@@ -10,11 +11,7 @@ namespace FarEdit.Core.ViewModels.MainWindowViewModel;
 public class MainWindowViewModel : ViewModelBase
 {
     public bool IsImage => _isImage.Value;
-    public string? FarPath
-    {
-        get => _farPath;
-        set => this.RaiseAndSetIfChanged(ref _farPath, value);
-    }
+    public string? FarPath => _farPath?.Value;
 
     public GetFarFiles.FarFileVm? SelectedFarFileVm
     {
@@ -29,6 +26,9 @@ public class MainWindowViewModel : ViewModelBase
     }
 
     public ReadOnlyObservableCollection<GetFarFiles.FarFileVm> FarFiles => _farFiles;
+
+    public ReactiveCommand<Unit, string?> OpenFileCmd { get; }
+    public IInteraction<Unit, string?> OpenFileInteraction { get; }
 
     public MainWindowViewModel(GetFarFiles.Handler getFarFilesHandler)
     {
@@ -58,6 +58,12 @@ public class MainWindowViewModel : ViewModelBase
             .WhereNotNull()
             .Select(x => x.Name.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase))
             .ToProperty(this, x => x.IsImage);
+
+        OpenFileInteraction = new Interaction<Unit, string?>();
+        OpenFileCmd = ReactiveCommand.CreateFromTask(
+            async () => await OpenFileInteraction.Handle(Unit.Default)
+        );
+        _farPath = OpenFileCmd.ToProperty(this, x => x.FarPath);
     }
 
     private static Func<GetFarFiles.FarFileVm, bool> CreateEntryFilterPredicate(string? txt)
@@ -73,6 +79,6 @@ public class MainWindowViewModel : ViewModelBase
     private readonly ObservableAsPropertyHelper<bool> _isImage;
     private readonly ReadOnlyObservableCollection<GetFarFiles.FarFileVm> _farFiles;
     private string? _entryFilter;
-    private string? _farPath;
+    private readonly ObservableAsPropertyHelper<string?>? _farPath;
     private GetFarFiles.FarFileVm? _selectedFarFileVm;
 }

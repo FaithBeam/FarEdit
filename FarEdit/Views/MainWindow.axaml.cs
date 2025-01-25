@@ -1,11 +1,43 @@
+using System;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Disposables;
+using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Platform.Storage;
+using Avalonia.ReactiveUI;
+using FarEdit.Core.ViewModels.MainWindowViewModel;
+using ReactiveUI;
 
 namespace FarEdit.Views;
 
-public partial class MainWindow : Window
+public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 {
     public MainWindow()
     {
         InitializeComponent();
+
+        this.WhenActivated(d =>
+        {
+            if (ViewModel is null)
+            {
+                return;
+            }
+
+            ViewModel.OpenFileInteraction.RegisterHandler(ShowOpenFileDialog).DisposeWith(d);
+        });
+    }
+
+    private async Task ShowOpenFileDialog(IInteractionContext<Unit, string?> ctx)
+    {
+        var result = await StorageProvider.OpenFilePickerAsync(
+            new FilePickerOpenOptions
+            {
+                Title = "Select .far file",
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType(".far") { Patterns = [".far"] }],
+            }
+        );
+        ctx.SetOutput(result[0].TryGetLocalPath());
     }
 }
