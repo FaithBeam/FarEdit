@@ -175,13 +175,8 @@ public class MainWindowViewModel : ViewModelBase
         AddEntriesCommand.Subscribe(x => entrySc.AddOrUpdate(x));
 
         RemoveEntriesCmd = ReactiveCommand.Create<IList<FarFileVm>>(entriesToRemove =>
-        {
-            if (!entriesToRemove.Any())
-            {
-                return;
-            }
-            entrySc.Remove(entriesToRemove);
-        });
+            entrySc.Remove(entriesToRemove)
+        );
     }
 
     private static Func<FarFileVm, bool> CreateEntryFilterPredicate(string? txt)
