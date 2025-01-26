@@ -4,7 +4,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
 using DynamicData.Binding;
-using DynamicData.Experimental;
 using FarEdit.Core.ViewModels.MainWindowViewModel.Commands;
 using FarEdit.Core.ViewModels.MainWindowViewModel.Queries;
 using ReactiveUI;
@@ -60,7 +59,23 @@ public class MainWindowViewModel : ViewModelBase
             handler => SelectedFarFiles.CollectionChanged -= handler
         );
         _selectedFarFileVm = selectedFarFilesChangedObs
-            .Select(x => x.EventArgs.NewItems?[0] as GetFarFiles.FarFileVm)
+            .Select(x =>
+                x.EventArgs.Action switch
+                {
+                    NotifyCollectionChangedAction.Remove => (
+                        (ObservableCollection<GetFarFiles.FarFileVm>?)x.Sender
+                    )?.LastOrDefault(),
+                    NotifyCollectionChangedAction.Add => x.EventArgs.NewItems?[0]
+                        as GetFarFiles.FarFileVm,
+                    NotifyCollectionChangedAction.Replace => x.EventArgs.NewItems?[0]
+                        as GetFarFiles.FarFileVm,
+                    NotifyCollectionChangedAction.Move => x.EventArgs.NewItems?[0]
+                        as GetFarFiles.FarFileVm,
+                    NotifyCollectionChangedAction.Reset => x.EventArgs.NewItems?[0]
+                        as GetFarFiles.FarFileVm,
+                    _ => throw new ArgumentOutOfRangeException(),
+                }
+            )
             .ToProperty(this, x => x.SelectedFarFileVm);
         var dynamicEntryFilter = this.WhenAnyValue(x => x.EntryFilter)
             .Select(CreateEntryFilterPredicate);

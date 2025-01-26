@@ -75,7 +75,7 @@
                     </MenuItem.CommandParameter>
                     <Image Source="/Assets/icons8-save-100.png" />
                     <ToolTip.Tip>
-                        <TextBlock>Save</TextBlock>
+                        <TextBlock>Save .far file</TextBlock>
                     </ToolTip.Tip>
                 </Button>
                 <Button Grid.Column="3" Classes="btn-img" Command="{Binding ExportCommand}"
