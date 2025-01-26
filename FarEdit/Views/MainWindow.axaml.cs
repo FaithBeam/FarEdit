@@ -4,6 +4,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Avalonia.ReactiveUI;
@@ -52,7 +53,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         var result = await StorageProvider.OpenFolderPickerAsync(
             new FolderPickerOpenOptions { Title = "Select a folder" }
         );
-        ctx.SetOutput(result[0].TryGetLocalPath());
+        ctx.SetOutput(result.Any() ? result[0].TryGetLocalPath() : string.Empty);
     }
 
     private async Task ShowSaveAsDialog(IInteractionContext<string, string?> ctx)
@@ -83,7 +84,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                 FileTypeFilter = [new FilePickerFileType(".far") { Patterns = [".far"] }],
             }
         );
-        ctx.SetOutput(result[0].TryGetLocalPath());
+        ctx.SetOutput(result.Any() ? result[0].TryGetLocalPath() : string.Empty);
     }
 
     private void MenuItemExit_OnClick(object? sender, RoutedEventArgs e)
@@ -105,5 +106,24 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         vm.SelectedFarFiles?.Clear();
         vm.SelectedFarFiles?.AddRange(dg.SelectedItems.Cast<FarFileVm>());
+    }
+
+    private void DockPanel_OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        switch (e)
+        {
+            case { Key: Key.O, KeyModifiers: KeyModifiers.Control }:
+                OpenMenuItem.Command?.Execute(Unit.Default);
+                break;
+            case { Key: Key.S, KeyModifiers: KeyModifiers.Control }:
+                SaveBtn.Command?.Execute((ViewModel?.FarPath, ViewModel?.UnFilteredFarFiles));
+                break;
+            case { Key: Key.N, KeyModifiers: KeyModifiers.Control }:
+                NewFarFileBtn.Command?.Execute(Unit.Default);
+                break;
+            case { Key: Key.E, KeyModifiers: KeyModifiers.Control }:
+                ExportEntriesBtn.Command?.Execute(ViewModel?.SelectedFarFiles);
+                break;
+        }
     }
 }

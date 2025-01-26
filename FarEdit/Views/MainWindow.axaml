@@ -28,10 +28,10 @@
         </Style>
     </Window.Styles>
 
-    <DockPanel>
+    <DockPanel x:Name="DockPanel" KeyDown="DockPanel_OnKeyDown">
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_Open" Command="{Binding OpenFileCmd}" />
+                <MenuItem x:Name="OpenMenuItem" Header="_Open" Command="{Binding OpenFileCmd}" />
                 <MenuItem Header="_Save" Command="{Binding SaveCommand}">
                     <MenuItem.CommandParameter>
                         <MultiBinding Converter="{StaticResource SaveParamConverter}">
@@ -54,19 +54,19 @@
         </Menu>
         <Grid RowDefinitions="Auto,Auto,*">
             <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
-                <Button Grid.Column="0" Classes="btn-img">
+                <Button x:Name="NewFarFileBtn" Grid.Column="0" Classes="btn-img">
                     <Image Source="/Assets/icons8-new-document-96.png" />
                     <ToolTip.Tip>
-                        <TextBlock>Create new file</TextBlock>
+                        <TextBlock>Create new file (CTRL+N)</TextBlock>
                     </ToolTip.Tip>
                 </Button>
                 <Button Grid.Column="1" Classes="btn-img" Command="{Binding OpenFileCmd}">
                     <Image Source="/Assets/icons8-opened-folder-96.png" />
                     <ToolTip.Tip>
-                        <TextBlock>Open file</TextBlock>
+                        <TextBlock>Open file (CTRL+O)</TextBlock>
                     </ToolTip.Tip>
                 </Button>
-                <Button Grid.Column="2" Classes="btn-img" Command="{Binding SaveCommand}">
+                <Button x:Name="SaveBtn" Grid.Column="2" Classes="btn-img" Command="{Binding SaveCommand}">
                     <MenuItem.CommandParameter>
                         <MultiBinding Converter="{StaticResource SaveParamConverter}">
                             <Binding Path="FarPath" />
@@ -75,10 +75,10 @@
                     </MenuItem.CommandParameter>
                     <Image Source="/Assets/icons8-save-100.png" />
                     <ToolTip.Tip>
-                        <TextBlock>Save .far file</TextBlock>
+                        <TextBlock>Save .far file (CTRL+S)</TextBlock>
                     </ToolTip.Tip>
                 </Button>
-                <Button Grid.Column="3" Classes="btn-img" Command="{Binding ExportCommand}"
+                <Button x:Name="ExportEntriesBtn" Grid.Column="3" Classes="btn-img" Command="{Binding ExportCommand}"
                         CommandParameter="{Binding SelectedFarFiles}">
                     <Image Source="/Assets/icons8-export-80.png" />
                     <ToolTip.Tip>
