@@ -28,6 +28,9 @@ public class MainWindowViewModel : ViewModelBase
 
     public ReadOnlyObservableCollection<GetFarFiles.FarFileVm> FarFiles => _farFiles;
 
+    public ReadOnlyObservableCollection<GetFarFiles.FarFileVm> UnFilteredFarFiles =>
+        _unFilteredFarFiles;
+
     public ReactiveCommand<Unit, string?> OpenFileCmd { get; }
     public IInteraction<Unit, string?> OpenFileInteraction { get; }
     public ReactiveCommand<
@@ -51,6 +54,7 @@ public class MainWindowViewModel : ViewModelBase
         var dynamicEntryFilter = this.WhenAnyValue(x => x.EntryFilter)
             .Select(CreateEntryFilterPredicate);
         var entrySc = new SourceCache<GetFarFiles.FarFileVm, string>(x => x.Name);
+        entrySc.Connect().Bind(out _unFilteredFarFiles).Subscribe();
         entrySc
             .Connect()
             .Filter(dynamicEntryFilter)
@@ -83,7 +87,6 @@ public class MainWindowViewModel : ViewModelBase
         OpenFileCmd = ReactiveCommand.CreateFromTask<string?>(
             async () => await OpenFileInteraction.Handle(Unit.Default)
         );
-        // _farPath = OpenFileCmd.WhereNotNull().ToProperty(this, x => x.FarPath);
 
         var canSave = this.WhenAnyValue(
             x => x.FarFiles,
@@ -147,6 +150,8 @@ public class MainWindowViewModel : ViewModelBase
 
     private readonly ObservableAsPropertyHelper<bool> _isImage;
     private readonly ReadOnlyObservableCollection<GetFarFiles.FarFileVm> _farFiles;
+    private readonly ReadOnlyObservableCollection<GetFarFiles.FarFileVm> _unFilteredFarFiles;
+
     private string? _entryFilter;
     private readonly ObservableAsPropertyHelper<string?>? _farPath;
     private GetFarFiles.FarFileVm? _selectedFarFileVm;

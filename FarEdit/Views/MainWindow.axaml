@@ -29,7 +29,7 @@
                     <MenuItem.CommandParameter>
                         <MultiBinding Converter="{StaticResource SaveConverter}">
                             <Binding Path="FarPath" />
-                            <Binding Path="FarFiles" />
+                            <Binding Path="UnFilteredFarFiles" />
                         </MultiBinding>
                     </MenuItem.CommandParameter>
                 </MenuItem>
@@ -37,7 +37,7 @@
                     <MenuItem.CommandParameter>
                         <MultiBinding Converter="{StaticResource SaveConverter}">
                             <Binding Path="FarPath" />
-                            <Binding Path="FarFiles" />
+                            <Binding Path="UnFilteredFarFiles" />
                         </MultiBinding>
                     </MenuItem.CommandParameter>
                 </MenuItem>
