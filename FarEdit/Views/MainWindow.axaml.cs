@@ -4,6 +4,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Controls.Shapes;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Avalonia.ReactiveUI;
@@ -22,18 +23,49 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         {
             if (ViewModel is null)
             {
-                return; 
+                return;
             }
 
             ViewModel.OpenFileInteraction.RegisterHandler(ShowOpenFileDialog).DisposeWith(d);
             ViewModel.SaveAsInteraction.RegisterHandler(ShowSaveAsDialog).DisposeWith(d);
+            ViewModel.ExportInteraction.RegisterHandler(ShowExportDialog).DisposeWith(d);
         });
     }
 
-    private async Task ShowSaveAsDialog(IInteractionContext<Unit, string?> arg)
+    private async Task ShowExportDialog(IInteractionContext<string, string?> ctx)
     {
-        // TODO
-        var result = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions());
+        var result = await StorageProvider.SaveFilePickerAsync(
+            new FilePickerSaveOptions
+            {
+                Title = "Export File",
+                FileTypeChoices =
+                [
+                    new FilePickerFileType(ctx.Input)
+                    {
+                        Patterns = [System.IO.Path.GetExtension(ctx.Input)],
+                    },
+                ],
+            }
+        );
+        ctx.SetOutput(result?.TryGetLocalPath());
+    }
+
+    private async Task ShowSaveAsDialog(IInteractionContext<string, string?> ctx)
+    {
+        var result = await StorageProvider.SaveFilePickerAsync(
+            new FilePickerSaveOptions
+            {
+                Title = "Save As",
+                FileTypeChoices =
+                [
+                    new FilePickerFileType(ctx.Input)
+                    {
+                        Patterns = [System.IO.Path.GetExtension(ctx.Input)],
+                    },
+                ],
+            }
+        );
+        ctx.SetOutput(result?.TryGetLocalPath());
     }
 
     private async Task ShowOpenFileDialog(IInteractionContext<Unit, string?> ctx)

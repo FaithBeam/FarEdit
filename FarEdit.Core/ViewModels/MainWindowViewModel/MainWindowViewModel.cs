@@ -30,11 +30,23 @@ public class MainWindowViewModel : ViewModelBase
 
     public ReactiveCommand<Unit, string?> OpenFileCmd { get; }
     public IInteraction<Unit, string?> OpenFileInteraction { get; }
-    public ReactiveCommand<Unit, Unit> SaveCommand { get; }
-    public ReactiveCommand<Unit, string?> SaveAsCommand { get; }
-    public IInteraction<Unit, string?> SaveAsInteraction { get; }
+    public ReactiveCommand<
+        (string, ReadOnlyObservableCollection<GetFarFiles.FarFileVm>),
+        Unit
+    > SaveCommand { get; }
+    public ReactiveCommand<
+        (string, ReadOnlyObservableCollection<GetFarFiles.FarFileVm>),
+        string?
+    > SaveAsCommand { get; }
+    public IInteraction<string, string?> SaveAsInteraction { get; }
+    public ReactiveCommand<GetFarFiles.FarFileVm, Unit> ExportCommand { get; }
+    public IInteraction<string, string?> ExportInteraction { get; }
 
-    public MainWindowViewModel(GetFarFiles.Handler getFarFilesHandler, Save.Handler saveHandler)
+    public MainWindowViewModel(
+        GetFarFiles.Handler getFarFilesHandler,
+        Save.Handler saveHandler,
+        Export.Handler exportHandler
+    )
     {
         var dynamicEntryFilter = this.WhenAnyValue(x => x.EntryFilter)
             .Select(CreateEntryFilterPredicate);
@@ -67,24 +79,59 @@ public class MainWindowViewModel : ViewModelBase
             .ToProperty(this, x => x.IsImage);
 
         OpenFileInteraction = new Interaction<Unit, string?>();
-        OpenFileCmd = ReactiveCommand.CreateFromTask(
+        // <string?> is necessary even though it says it isn't
+        OpenFileCmd = ReactiveCommand.CreateFromTask<string?>(
             async () => await OpenFileInteraction.Handle(Unit.Default)
         );
-        _farPath = OpenFileCmd.ToProperty(this, x => x.FarPath);
+        // _farPath = OpenFileCmd.WhereNotNull().ToProperty(this, x => x.FarPath);
 
         var canSave = this.WhenAnyValue(
             x => x.FarFiles,
             property2: x => x.FarPath,
             selector: (farFiles, farPath) => farFiles.Any() && !string.IsNullOrWhiteSpace(farPath)
         );
-        SaveCommand = ReactiveCommand.Create(
-            () => saveHandler.Execute(new Save.Command(FarPath!, FarFiles)),
-            canSave
-        );
+        SaveCommand = ReactiveCommand.Create<(
+            string,
+            ReadOnlyObservableCollection<GetFarFiles.FarFileVm>
+        )>(tuple => saveHandler.Execute(new Save.Command(tuple.Item1, tuple.Item2)), canSave);
 
-        SaveAsInteraction = new Interaction<Unit, string?>();
-        SaveAsCommand = ReactiveCommand.CreateFromTask(
-            async () => await SaveAsInteraction.Handle(Unit.Default)
+        SaveAsInteraction = new Interaction<string, string?>();
+        var canSaveAs = this.WhenAnyValue(
+            x => x.FarPath,
+            selector: farPath => !string.IsNullOrWhiteSpace(farPath)
+        );
+        SaveAsCommand = ReactiveCommand.CreateFromTask<
+            (string, ReadOnlyObservableCollection<GetFarFiles.FarFileVm>),
+            string?
+        >(
+            async tuple =>
+            {
+                var dst = await SaveAsInteraction.Handle(Path.GetExtension(tuple.Item1));
+                if (string.IsNullOrWhiteSpace(dst))
+                {
+                    return null;
+                }
+                saveHandler.Execute(new Save.Command(dst, tuple.Item2));
+                return dst;
+            },
+            canSaveAs
+        );
+        _farPath = OpenFileCmd.Merge(SaveAsCommand).ToProperty(this, x => x.FarPath);
+
+        ExportInteraction = new Interaction<string, string?>();
+        var canExport = this.WhenAnyValue(x => x.SelectedFarFileVm, selector: vm => vm is not null);
+        ExportCommand = ReactiveCommand.CreateFromTask<GetFarFiles.FarFileVm>(
+            async farFileVm =>
+            {
+                var path = await ExportInteraction.Handle(farFileVm.Name);
+                if (string.IsNullOrWhiteSpace(path))
+                {
+                    return;
+                }
+
+                await exportHandler.Execute(new Export.Command(path, farFileVm));
+            },
+            canExport
         );
     }
 
