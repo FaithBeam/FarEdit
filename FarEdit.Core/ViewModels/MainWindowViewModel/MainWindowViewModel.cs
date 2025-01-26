@@ -18,7 +18,7 @@ public class MainWindowViewModel : ViewModelBase
 
     public FarFileVm? SelectedFarFileVm => _selectedFarFileVm.Value;
 
-    public ObservableCollection<FarFileVm>? SelectedFarFiles { get; }
+    public ObservableCollection<FarFileVm>? SelectedFarFiles { get; set; }
 
     public string? EntryFilter
     {

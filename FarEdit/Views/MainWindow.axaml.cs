@@ -3,10 +3,13 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Avalonia.ReactiveUI;
+using DynamicData;
 using FarEdit.Core.ViewModels.MainWindowViewModel;
+using FarEdit.Core.ViewModels.MainWindowViewModel.Models;
 using ReactiveUI;
 
 namespace FarEdit.Views;
@@ -86,5 +89,21 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     private void MenuItemExit_OnClick(object? sender, RoutedEventArgs e)
     {
         Close();
+    }
+
+    private void FarFileDataGrid_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (sender is not DataGrid dg)
+        {
+            return;
+        }
+
+        if (DataContext is not MainWindowViewModel vm)
+        {
+            return;
+        }
+
+        vm.SelectedFarFiles?.Clear();
+        vm.SelectedFarFiles?.AddRange(dg.SelectedItems.Cast<FarFileVm>());
     }
 }

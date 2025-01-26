@@ -111,14 +111,17 @@
                         <Label Content="Files in archive" />
                         <TextBox Grid.Column="1" Text="{Binding EntryFilter}" />
                     </Grid>
-                    <ListBox Grid.Row="1" ItemsSource="{Binding FarFiles}" 
-                             SelectionMode="Multiple" SelectedItems="{Binding SelectedFarFiles}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Name}" />
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                    <DataGrid x:Name="FarFileDataGrid"
+                              Grid.Row="1"
+                              ItemsSource="{Binding FarFiles}"
+                              SelectionMode="Extended"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="False"
+                              SelectionChanged="FarFileDataGrid_OnSelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn IsReadOnly="False" Header="Name" Binding="{Binding Name}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Grid>
                 <Grid Grid.Column="1" RowDefinitions="Auto,*">
                     <Label Content="Selected Entry Data" />
