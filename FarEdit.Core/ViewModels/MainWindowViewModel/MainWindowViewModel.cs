@@ -179,15 +179,10 @@ public class MainWindowViewModel : ViewModelBase
         );
     }
 
-    private static Func<FarFileVm, bool> CreateEntryFilterPredicate(string? txt)
-    {
-        if (string.IsNullOrWhiteSpace(txt))
-        {
-            return _ => true;
-        }
-
-        return ffVm => ffVm.Name.Contains(txt, StringComparison.OrdinalIgnoreCase);
-    }
+    private static Func<FarFileVm, bool> CreateEntryFilterPredicate(string? txt) =>
+        string.IsNullOrWhiteSpace(txt)
+            ? _ => true
+            : ffVm => ffVm.Name.Contains(txt, StringComparison.OrdinalIgnoreCase);
 
     private readonly ObservableAsPropertyHelper<bool> _isImage;
     private readonly ReadOnlyObservableCollection<FarFileVm> _farFiles;
