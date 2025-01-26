@@ -9,8 +9,9 @@ public static class MainWindowViewModelRegistrations
     public static void Register(IServiceCollection services)
     {
         services
-            .AddScoped<GetFarFiles.Handler>()
-            .AddScoped<Save.Handler>()
-            .AddScoped<Export.Handler>();
+            .AddScoped<GetFarVm.Handler>()
+            .AddScoped<SaveFar.Handler>()
+            .AddScoped<ExportEntries.Handler>()
+            .AddScoped<GetFarFilesFromPaths.Handler>();
     }
 }

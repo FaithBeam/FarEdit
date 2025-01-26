@@ -53,7 +53,7 @@
             <MenuItem Header="_Entries" />
         </Menu>
         <Grid RowDefinitions="Auto,Auto,*">
-            <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto">
+            <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
                 <Button Grid.Column="0" Classes="btn-img">
                     <Image Source="/Assets/icons8-new-document-96.png" />
                     <ToolTip.Tip>
@@ -85,7 +85,13 @@
                         <TextBlock>Export entries</TextBlock>
                     </ToolTip.Tip>
                 </Button>
-                <Button Grid.Column="4" Classes="btn-img">
+                <Button Grid.Column="4" Classes="btn-img" Command="{Binding AddEntriesCommand}">
+                    <Image Source="/Assets/icons8-add-file-96.png" />
+                    <ToolTip.Tip>
+                        <TextBlock>Add entries</TextBlock>
+                    </ToolTip.Tip>
+                </Button>
+                <Button Grid.Column="5" Classes="btn-img" Command="{Binding RemoveEntriesCmd}" CommandParameter="{Binding SelectedFarFiles}">
                     <Image Source="/Assets/icons8-delete-document-96.png" />
                     <ToolTip.Tip>
                         <TextBlock>Delete entries</TextBlock>

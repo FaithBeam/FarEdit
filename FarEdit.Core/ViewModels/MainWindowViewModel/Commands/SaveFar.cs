@@ -1,11 +1,11 @@
-using FarEdit.Core.ViewModels.MainWindowViewModel.Queries;
+using FarEdit.Core.ViewModels.MainWindowViewModel.Models;
 using Sims.Far;
 
 namespace FarEdit.Core.ViewModels.MainWindowViewModel.Commands;
 
-public static class Save
+public static class SaveFar
 {
-    public sealed record Command(string Path, IEnumerable<GetFarFiles.FarFileVm> Files);
+    public sealed record Command(string Path, IEnumerable<FarFileVm> Files);
 
     public sealed class Handler
     {

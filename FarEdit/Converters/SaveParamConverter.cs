@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using Avalonia.Data.Converters;
-using FarEdit.Core.ViewModels.MainWindowViewModel.Queries;
+using FarEdit.Core.ViewModels.MainWindowViewModel.Models;
 
 namespace FarEdit.Converters;
 
@@ -23,7 +23,7 @@ public class SaveParamConverter : IMultiValueConverter
 
         if (
             values[0] is not string path
-            || values[1] is not ReadOnlyObservableCollection<GetFarFiles.FarFileVm> files
+            || values[1] is not ReadOnlyObservableCollection<FarFileVm> files
         )
         {
             return null;

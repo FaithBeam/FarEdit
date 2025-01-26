@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using DynamicData;
 using DynamicData.Binding;
 using FarEdit.Core.ViewModels.MainWindowViewModel.Commands;
+using FarEdit.Core.ViewModels.MainWindowViewModel.Models;
 using FarEdit.Core.ViewModels.MainWindowViewModel.Queries;
 using ReactiveUI;
 
@@ -15,9 +16,9 @@ public class MainWindowViewModel : ViewModelBase
     public bool IsImage => _isImage.Value;
     public string? FarPath => _farPath?.Value;
 
-    public GetFarFiles.FarFileVm? SelectedFarFileVm => _selectedFarFileVm.Value;
+    public FarFileVm? SelectedFarFileVm => _selectedFarFileVm.Value;
 
-    public ObservableCollection<GetFarFiles.FarFileVm>? SelectedFarFiles { get; }
+    public ObservableCollection<FarFileVm>? SelectedFarFiles { get; }
 
     public string? EntryFilter
     {
@@ -25,29 +26,32 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _entryFilter, value);
     }
 
-    public ReadOnlyObservableCollection<GetFarFiles.FarFileVm> FarFiles => _farFiles;
+    public ReadOnlyObservableCollection<FarFileVm> FarFiles => _farFiles;
 
-    public ReadOnlyObservableCollection<GetFarFiles.FarFileVm> UnFilteredFarFiles =>
-        _unFilteredFarFiles;
+    public ReadOnlyObservableCollection<FarFileVm> UnFilteredFarFiles => _unFilteredFarFiles;
 
     public ReactiveCommand<Unit, string?> OpenFileCmd { get; }
     public IInteraction<Unit, string?> OpenFileInteraction { get; }
     public ReactiveCommand<
-        (string, ReadOnlyObservableCollection<GetFarFiles.FarFileVm>),
+        (string, ReadOnlyObservableCollection<FarFileVm>),
         Unit
     > SaveCommand { get; }
     public ReactiveCommand<
-        (string, ReadOnlyObservableCollection<GetFarFiles.FarFileVm>),
+        (string, ReadOnlyObservableCollection<FarFileVm>),
         string?
     > SaveAsCommand { get; }
     public IInteraction<string, string?> SaveAsInteraction { get; }
-    public ReactiveCommand<IList<GetFarFiles.FarFileVm>, Unit> ExportCommand { get; }
+    public ReactiveCommand<IList<FarFileVm>, Unit> ExportCommand { get; }
     public IInteraction<Unit, string?> ExportInteraction { get; }
+    public ReactiveCommand<Unit, List<FarFileVm>> AddEntriesCommand { get; }
+    public IInteraction<Unit, List<string>> AddEntriesInteraction { get; }
+    public ReactiveCommand<IList<FarFileVm>, Unit> RemoveEntriesCmd { get; }
 
     public MainWindowViewModel(
-        GetFarFiles.Handler getFarFilesHandler,
-        Save.Handler saveHandler,
-        Export.Handler exportHandler
+        GetFarVm.Handler getFarFilesHandler,
+        SaveFar.Handler saveHandler,
+        ExportEntries.Handler exportHandler,
+        GetFarFilesFromPaths.Handler getFarFilesFromPathsHandler
     )
     {
         SelectedFarFiles = [];
@@ -63,36 +67,29 @@ public class MainWindowViewModel : ViewModelBase
                 x.EventArgs.Action switch
                 {
                     NotifyCollectionChangedAction.Remove => (
-                        (ObservableCollection<GetFarFiles.FarFileVm>?)x.Sender
+                        (ObservableCollection<FarFileVm>?)x.Sender
                     )?.LastOrDefault(),
-                    NotifyCollectionChangedAction.Add => x.EventArgs.NewItems?[0]
-                        as GetFarFiles.FarFileVm,
-                    NotifyCollectionChangedAction.Replace => x.EventArgs.NewItems?[0]
-                        as GetFarFiles.FarFileVm,
-                    NotifyCollectionChangedAction.Move => x.EventArgs.NewItems?[0]
-                        as GetFarFiles.FarFileVm,
-                    NotifyCollectionChangedAction.Reset => x.EventArgs.NewItems?[0]
-                        as GetFarFiles.FarFileVm,
+                    NotifyCollectionChangedAction.Add => x.EventArgs.NewItems?[0] as FarFileVm,
+                    NotifyCollectionChangedAction.Replace => x.EventArgs.NewItems?[0] as FarFileVm,
+                    NotifyCollectionChangedAction.Move => x.EventArgs.NewItems?[0] as FarFileVm,
+                    NotifyCollectionChangedAction.Reset => x.EventArgs.NewItems?[0] as FarFileVm,
                     _ => throw new ArgumentOutOfRangeException(),
                 }
             )
             .ToProperty(this, x => x.SelectedFarFileVm);
         var dynamicEntryFilter = this.WhenAnyValue(x => x.EntryFilter)
             .Select(CreateEntryFilterPredicate);
-        var entrySc = new SourceCache<GetFarFiles.FarFileVm, string>(x => x.Name);
+        var entrySc = new SourceCache<FarFileVm, string>(x => x.Name);
         entrySc.Connect().Bind(out _unFilteredFarFiles).Subscribe();
         entrySc
             .Connect()
             .Filter(dynamicEntryFilter)
-            .SortAndBind(
-                out _farFiles,
-                SortExpressionComparer<GetFarFiles.FarFileVm>.Ascending(x => x.Name)
-            )
+            .SortAndBind(out _farFiles, SortExpressionComparer<FarFileVm>.Ascending(x => x.Name))
             .Subscribe();
         this.WhenAnyValue(x => x.FarPath)
             .WhereNotNull()
             .Where(File.Exists)
-            .Select(x => getFarFilesHandler.Execute(new GetFarFiles.Query(x)))
+            .Select(x => getFarFilesHandler.Execute(new GetFarVm.Query(x)))
             .Subscribe(x =>
                 entrySc.Edit(inner =>
                 {
@@ -115,14 +112,13 @@ public class MainWindowViewModel : ViewModelBase
         );
 
         var canSave = this.WhenAnyValue(
-            x => x.FarFiles,
-            property2: x => x.FarPath,
-            selector: (farFiles, farPath) => farFiles.Any() && !string.IsNullOrWhiteSpace(farPath)
+            x => x.FarPath,
+            selector: farPath => !string.IsNullOrWhiteSpace(farPath)
         );
-        SaveCommand = ReactiveCommand.Create<(
-            string,
-            ReadOnlyObservableCollection<GetFarFiles.FarFileVm>
-        )>(tuple => saveHandler.Execute(new Save.Command(tuple.Item1, tuple.Item2)), canSave);
+        SaveCommand = ReactiveCommand.Create<(string, ReadOnlyObservableCollection<FarFileVm>)>(
+            tuple => saveHandler.Execute(new SaveFar.Command(tuple.Item1, tuple.Item2)),
+            canSave
+        );
 
         SaveAsInteraction = new Interaction<string, string?>();
         var canSaveAs = this.WhenAnyValue(
@@ -130,7 +126,7 @@ public class MainWindowViewModel : ViewModelBase
             selector: farPath => !string.IsNullOrWhiteSpace(farPath)
         );
         SaveAsCommand = ReactiveCommand.CreateFromTask<
-            (string, ReadOnlyObservableCollection<GetFarFiles.FarFileVm>),
+            (string, ReadOnlyObservableCollection<FarFileVm>),
             string?
         >(
             async tuple =>
@@ -140,7 +136,7 @@ public class MainWindowViewModel : ViewModelBase
                 {
                     return null;
                 }
-                saveHandler.Execute(new Save.Command(dst, tuple.Item2));
+                saveHandler.Execute(new SaveFar.Command(dst, tuple.Item2));
                 return dst;
             },
             canSaveAs
@@ -148,25 +144,47 @@ public class MainWindowViewModel : ViewModelBase
         _farPath = OpenFileCmd.Merge(SaveAsCommand).ToProperty(this, x => x.FarPath);
 
         ExportInteraction = new Interaction<Unit, string?>();
-        ExportCommand = ReactiveCommand.CreateFromTask<IList<GetFarFiles.FarFileVm>>(
-            async selectedEntries =>
+        ExportCommand = ReactiveCommand.CreateFromTask<IList<FarFileVm>>(async selectedEntries =>
+        {
+            if (selectedEntries.Count == 0)
             {
-                if (selectedEntries.Count == 0)
-                {
-                    return;
-                }
-                var dstFolder = await ExportInteraction.Handle(Unit.Default);
-                if (string.IsNullOrWhiteSpace(dstFolder))
-                {
-                    return;
-                }
-
-                await exportHandler.Execute(new Export.Command(dstFolder, selectedEntries));
+                return;
             }
+            var dstFolder = await ExportInteraction.Handle(Unit.Default);
+            if (string.IsNullOrWhiteSpace(dstFolder))
+            {
+                return;
+            }
+
+            await exportHandler.Execute(new ExportEntries.Command(dstFolder, selectedEntries));
+        });
+
+        AddEntriesInteraction = new Interaction<Unit, List<string>>();
+        var canAddEntries = this.WhenAnyValue(
+            x => x.FarPath,
+            selector: farPath => !string.IsNullOrWhiteSpace(farPath)
         );
+        AddEntriesCommand = ReactiveCommand.CreateFromTask<List<FarFileVm>>(
+            async () =>
+            {
+                var paths = await AddEntriesInteraction.Handle(Unit.Default);
+                return getFarFilesFromPathsHandler.Execute(new GetFarFilesFromPaths.Query(paths));
+            },
+            canAddEntries
+        );
+        AddEntriesCommand.Subscribe(x => entrySc.AddOrUpdate(x));
+
+        RemoveEntriesCmd = ReactiveCommand.Create<IList<FarFileVm>>(entriesToRemove =>
+        {
+            if (!entriesToRemove.Any())
+            {
+                return;
+            }
+            entrySc.Remove(entriesToRemove);
+        });
     }
 
-    private static Func<GetFarFiles.FarFileVm, bool> CreateEntryFilterPredicate(string? txt)
+    private static Func<FarFileVm, bool> CreateEntryFilterPredicate(string? txt)
     {
         if (string.IsNullOrWhiteSpace(txt))
         {
@@ -177,11 +195,10 @@ public class MainWindowViewModel : ViewModelBase
     }
 
     private readonly ObservableAsPropertyHelper<bool> _isImage;
-    private readonly ReadOnlyObservableCollection<GetFarFiles.FarFileVm> _farFiles;
-    private readonly ReadOnlyObservableCollection<GetFarFiles.FarFileVm> _unFilteredFarFiles;
+    private readonly ReadOnlyObservableCollection<FarFileVm> _farFiles;
+    private readonly ReadOnlyObservableCollection<FarFileVm> _unFilteredFarFiles;
 
     private string? _entryFilter;
     private readonly ObservableAsPropertyHelper<string?>? _farPath;
-    private readonly ObservableAsPropertyHelper<GetFarFiles.FarFileVm?> _selectedFarFileVm;
-    // private ObservableCollection<GetFarFiles.FarFileVm>? _selectedFarFiles;
+    private readonly ObservableAsPropertyHelper<FarFileVm?> _selectedFarFileVm;
 }

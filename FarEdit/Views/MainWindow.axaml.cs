@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Threading.Tasks;
@@ -25,7 +27,21 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             ViewModel.OpenFileInteraction.RegisterHandler(ShowOpenFileDialog).DisposeWith(d);
             ViewModel.SaveAsInteraction.RegisterHandler(ShowSaveAsDialog).DisposeWith(d);
             ViewModel.ExportInteraction.RegisterHandler(ShowExportDialog).DisposeWith(d);
+            ViewModel.AddEntriesInteraction.RegisterHandler(ShowAddEntriesDialog).DisposeWith(d);
         });
+    }
+
+    private async Task ShowAddEntriesDialog(IInteractionContext<Unit, List<string>> ctx)
+    {
+        var paths = await StorageProvider.OpenFilePickerAsync(
+            new FilePickerOpenOptions { Title = "Select files to add", AllowMultiple = true }
+        );
+        ctx.SetOutput(
+            paths
+                .Select(x => x.TryGetLocalPath() ?? "")
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .ToList()
+        );
     }
 
     private async Task ShowExportDialog(IInteractionContext<Unit, string?> ctx)

@@ -1,10 +1,10 @@
-using FarEdit.Core.ViewModels.MainWindowViewModel.Queries;
+using FarEdit.Core.ViewModels.MainWindowViewModel.Models;
 
 namespace FarEdit.Core.ViewModels.MainWindowViewModel.Commands;
 
-public static class Export
+public static class ExportEntries
 {
-    public sealed record Command(string Path, IList<GetFarFiles.FarFileVm> Vms);
+    public sealed record Command(string Path, IList<FarFileVm> Vms);
 
     public sealed class Handler
     {

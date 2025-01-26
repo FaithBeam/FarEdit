@@ -6,9 +6,8 @@ using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Media.Imaging;
 using AvaloniaHex.Document;
-using FarEdit.Core.ViewModels.MainWindowViewModel.Queries;
+using FarEdit.Core.ViewModels.MainWindowViewModel.Models;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 
 namespace FarEdit.Converters;
 
@@ -20,7 +19,7 @@ public class FarFileVmConverter : IValueConverter
         object? parameter,
         CultureInfo culture
     ) =>
-        value is not GetFarFiles.FarFileVm vm || parameter is not string para
+        value is not FarFileVm vm || parameter is not string para
             ? null
             : para switch
             {
