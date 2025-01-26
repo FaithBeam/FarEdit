@@ -7,7 +7,7 @@ using FarEdit.Core.ViewModels.MainWindowViewModel.Queries;
 
 namespace FarEdit.Converters;
 
-public class SaveConverter : IMultiValueConverter
+public class SaveParamConverter : IMultiValueConverter
 {
     public object? Convert(
         IList<object?> values,

@@ -1,8 +1,10 @@
 ﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
 using DynamicData.Binding;
+using DynamicData.Experimental;
 using FarEdit.Core.ViewModels.MainWindowViewModel.Commands;
 using FarEdit.Core.ViewModels.MainWindowViewModel.Queries;
 using ReactiveUI;
@@ -14,11 +16,9 @@ public class MainWindowViewModel : ViewModelBase
     public bool IsImage => _isImage.Value;
     public string? FarPath => _farPath?.Value;
 
-    public GetFarFiles.FarFileVm? SelectedFarFileVm
-    {
-        get => _selectedFarFileVm;
-        set => this.RaiseAndSetIfChanged(ref _selectedFarFileVm, value);
-    }
+    public GetFarFiles.FarFileVm? SelectedFarFileVm => _selectedFarFileVm.Value;
+
+    public ObservableCollection<GetFarFiles.FarFileVm>? SelectedFarFiles { get; }
 
     public string? EntryFilter
     {
@@ -42,8 +42,8 @@ public class MainWindowViewModel : ViewModelBase
         string?
     > SaveAsCommand { get; }
     public IInteraction<string, string?> SaveAsInteraction { get; }
-    public ReactiveCommand<GetFarFiles.FarFileVm, Unit> ExportCommand { get; }
-    public IInteraction<string, string?> ExportInteraction { get; }
+    public ReactiveCommand<IList<GetFarFiles.FarFileVm>, Unit> ExportCommand { get; }
+    public IInteraction<Unit, string?> ExportInteraction { get; }
 
     public MainWindowViewModel(
         GetFarFiles.Handler getFarFilesHandler,
@@ -51,6 +51,17 @@ public class MainWindowViewModel : ViewModelBase
         Export.Handler exportHandler
     )
     {
+        SelectedFarFiles = [];
+        var selectedFarFilesChangedObs = Observable.FromEventPattern<
+            NotifyCollectionChangedEventHandler,
+            NotifyCollectionChangedEventArgs
+        >(
+            handler => SelectedFarFiles.CollectionChanged += handler,
+            handler => SelectedFarFiles.CollectionChanged -= handler
+        );
+        _selectedFarFileVm = selectedFarFilesChangedObs
+            .Select(x => x.EventArgs.NewItems?[0] as GetFarFiles.FarFileVm)
+            .ToProperty(this, x => x.SelectedFarFileVm);
         var dynamicEntryFilter = this.WhenAnyValue(x => x.EntryFilter)
             .Select(CreateEntryFilterPredicate);
         var entrySc = new SourceCache<GetFarFiles.FarFileVm, string>(x => x.Name);
@@ -121,20 +132,22 @@ public class MainWindowViewModel : ViewModelBase
         );
         _farPath = OpenFileCmd.Merge(SaveAsCommand).ToProperty(this, x => x.FarPath);
 
-        ExportInteraction = new Interaction<string, string?>();
-        var canExport = this.WhenAnyValue(x => x.SelectedFarFileVm, selector: vm => vm is not null);
-        ExportCommand = ReactiveCommand.CreateFromTask<GetFarFiles.FarFileVm>(
-            async farFileVm =>
+        ExportInteraction = new Interaction<Unit, string?>();
+        ExportCommand = ReactiveCommand.CreateFromTask<IList<GetFarFiles.FarFileVm>>(
+            async selectedEntries =>
             {
-                var path = await ExportInteraction.Handle(farFileVm.Name);
-                if (string.IsNullOrWhiteSpace(path))
+                if (selectedEntries.Count == 0)
+                {
+                    return;
+                }
+                var dstFolder = await ExportInteraction.Handle(Unit.Default);
+                if (string.IsNullOrWhiteSpace(dstFolder))
                 {
                     return;
                 }
 
-                await exportHandler.Execute(new Export.Command(path, farFileVm));
-            },
-            canExport
+                await exportHandler.Execute(new Export.Command(dstFolder, selectedEntries));
+            }
         );
     }
 
@@ -154,5 +167,6 @@ public class MainWindowViewModel : ViewModelBase
 
     private string? _entryFilter;
     private readonly ObservableAsPropertyHelper<string?>? _farPath;
-    private GetFarFiles.FarFileVm? _selectedFarFileVm;
+    private readonly ObservableAsPropertyHelper<GetFarFiles.FarFileVm?> _selectedFarFileVm;
+    // private ObservableCollection<GetFarFiles.FarFileVm>? _selectedFarFiles;
 }

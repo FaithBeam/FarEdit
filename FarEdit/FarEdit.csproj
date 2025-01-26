@@ -34,4 +34,8 @@
     <ItemGroup>
       <ProjectReference Include="..\FarEdit.Core\FarEdit.Core.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Assets\" />
+    </ItemGroup>
 </Project>

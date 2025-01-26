@@ -1,10 +1,6 @@
-using System;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Threading.Tasks;
-using Avalonia.Controls;
-using Avalonia.Controls.Shapes;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Avalonia.ReactiveUI;
@@ -32,22 +28,12 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         });
     }
 
-    private async Task ShowExportDialog(IInteractionContext<string, string?> ctx)
+    private async Task ShowExportDialog(IInteractionContext<Unit, string?> ctx)
     {
-        var result = await StorageProvider.SaveFilePickerAsync(
-            new FilePickerSaveOptions
-            {
-                Title = "Export File",
-                FileTypeChoices =
-                [
-                    new FilePickerFileType(ctx.Input)
-                    {
-                        Patterns = [System.IO.Path.GetExtension(ctx.Input)],
-                    },
-                ],
-            }
+        var result = await StorageProvider.OpenFolderPickerAsync(
+            new FolderPickerOpenOptions { Title = "Select a folder" }
         );
-        ctx.SetOutput(result?.TryGetLocalPath());
+        ctx.SetOutput(result[0].TryGetLocalPath());
     }
 
     private async Task ShowSaveAsDialog(IInteractionContext<string, string?> ctx)
