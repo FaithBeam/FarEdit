@@ -64,7 +64,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     private async Task ShowExportDialog(IInteractionContext<Unit, string?> ctx)
     {
         var result = await StorageProvider.OpenFolderPickerAsync(
-            new FolderPickerOpenOptions { Title = "Select a folder" }
+            new FolderPickerOpenOptions { Title = "Export Entries to Folder" }
         );
         ctx.SetOutput(result.Any() ? result[0].TryGetLocalPath() : string.Empty);
     }

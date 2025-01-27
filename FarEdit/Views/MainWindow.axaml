@@ -108,9 +108,9 @@
             </Grid>
             <Grid Grid.Row="2" ColumnDefinitions="*,4,*">
                 <Grid RowDefinitions="Auto,*">
-                    <Grid ColumnDefinitions="*,*">
+                    <Grid ColumnDefinitions="Auto,*">
                         <Label Content="Files in archive" />
-                        <TextBox Grid.Column="1" Text="{Binding EntryFilter}" />
+                        <TextBox Grid.Column="1" Text="{Binding EntryFilter}" Watermark="Filter" />
                     </Grid>
                     <DataGrid x:Name="FarFileDataGrid"
                               Grid.Row="1"
