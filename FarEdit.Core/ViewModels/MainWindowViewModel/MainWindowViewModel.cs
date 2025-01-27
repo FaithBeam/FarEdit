@@ -46,6 +46,8 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, List<FarFileVm>> AddEntriesCommand { get; }
     public IInteraction<Unit, List<string>> AddEntriesInteraction { get; }
     public ReactiveCommand<IList<FarFileVm>, Unit> RemoveEntriesCmd { get; }
+    public ReactiveCommand<Unit, string?> NewFileCmd { get; }
+    public IInteraction<Unit, string?> NewFileInteraction { get; }
 
     public MainWindowViewModel(
         GetFarVm.Handler getFarFilesHandler,
@@ -141,7 +143,6 @@ public class MainWindowViewModel : ViewModelBase
             },
             canSaveAs
         );
-        _farPath = OpenFileCmd.Merge(SaveAsCommand).ToProperty(this, x => x.FarPath);
 
         ExportInteraction = new Interaction<Unit, string?>();
         ExportCommand = ReactiveCommand.CreateFromTask<IList<FarFileVm>>(async selectedEntries =>
@@ -177,6 +178,17 @@ public class MainWindowViewModel : ViewModelBase
         RemoveEntriesCmd = ReactiveCommand.Create<IList<FarFileVm>>(entriesToRemove =>
             entrySc.Remove(entriesToRemove)
         );
+
+        NewFileInteraction = new Interaction<Unit, string?>();
+        NewFileCmd = ReactiveCommand.CreateFromTask<string?>(
+            async () => await NewFileInteraction.Handle(Unit.Default)
+        );
+        NewFileCmd.Subscribe(_ => entrySc.Clear());
+
+        _farPath = OpenFileCmd
+            .Merge(SaveAsCommand)
+            .Merge(NewFileCmd)
+            .ToProperty(this, x => x.FarPath);
     }
 
     private static Func<FarFileVm, bool> CreateEntryFilterPredicate(string? txt) =>

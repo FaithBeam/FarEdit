@@ -32,7 +32,20 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             ViewModel.SaveAsInteraction.RegisterHandler(ShowSaveAsDialog).DisposeWith(d);
             ViewModel.ExportInteraction.RegisterHandler(ShowExportDialog).DisposeWith(d);
             ViewModel.AddEntriesInteraction.RegisterHandler(ShowAddEntriesDialog).DisposeWith(d);
+            ViewModel.NewFileInteraction.RegisterHandler(ShowNewFileDialog).DisposeWith(d);
         });
+    }
+
+    private async Task ShowNewFileDialog(IInteractionContext<Unit, string?> ctx)
+    {
+        var result = await StorageProvider.SaveFilePickerAsync(
+            new FilePickerSaveOptions
+            {
+                Title = "New File",
+                FileTypeChoices = [new FilePickerFileType("*.far") { Patterns = ["*.far"] }],
+            }
+        );
+        ctx.SetOutput(result?.TryGetLocalPath());
     }
 
     private async Task ShowAddEntriesDialog(IInteractionContext<Unit, List<string>> ctx)

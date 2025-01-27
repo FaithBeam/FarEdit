@@ -54,7 +54,7 @@
         </Menu>
         <Grid RowDefinitions="Auto,Auto,*">
             <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
-                <Button x:Name="NewFarFileBtn" Grid.Column="0" Classes="btn-img">
+                <Button x:Name="NewFarFileBtn" Grid.Column="0" Classes="btn-img" Command="{Binding NewFileCmd}">
                     <Image Source="/Assets/icons8-new-document-96.png" />
                     <ToolTip.Tip>
                         <TextBlock>Create new file (CTRL+N)</TextBlock>
