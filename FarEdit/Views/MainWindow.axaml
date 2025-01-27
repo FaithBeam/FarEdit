@@ -83,7 +83,7 @@
                         CommandParameter="{Binding SelectedFarFiles}">
                     <Image Source="/Assets/icons8-export-80.png" />
                     <ToolTip.Tip>
-                        <TextBlock>Export entries</TextBlock>
+                        <TextBlock>Export entries (CTRL+E)</TextBlock>
                     </ToolTip.Tip>
                 </Button>
                 <Button Grid.Column="4" Classes="btn-img" Command="{Binding AddEntriesCommand}">
@@ -92,10 +92,10 @@
                         <TextBlock>Add entries</TextBlock>
                     </ToolTip.Tip>
                 </Button>
-                <Button Grid.Column="5" Classes="btn-img" Command="{Binding RemoveEntriesCmd}" CommandParameter="{Binding SelectedFarFiles}">
+                <Button x:Name="DeleteEntriesBtn" Grid.Column="5" Classes="btn-img" Command="{Binding RemoveEntriesCmd}" CommandParameter="{Binding SelectedFarFiles}">
                     <Image Source="/Assets/icons8-delete-document-96.png" />
                     <ToolTip.Tip>
-                        <TextBlock>Delete entries</TextBlock>
+                        <TextBlock>Delete entries (CTRL+DEL)</TextBlock>
                     </ToolTip.Tip>
                 </Button>
             </Grid>

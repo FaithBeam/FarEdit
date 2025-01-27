@@ -137,6 +137,9 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             case { Key: Key.E, KeyModifiers: KeyModifiers.Control }:
                 ExportEntriesBtn.Command?.Execute(ViewModel?.SelectedFarFiles);
                 break;
+            case { Key: Key.Delete, KeyModifiers: KeyModifiers.Control }:
+                DeleteEntriesBtn.Command?.Execute(ViewModel?.SelectedFarFiles);
+                break;
         }
     }
 }
