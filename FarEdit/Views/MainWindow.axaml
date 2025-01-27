@@ -106,7 +106,7 @@
                 <Label Grid.Row="0" Grid.Column="1" Content="Entries" />
                 <TextBox Grid.Row="1" Grid.Column="1" IsReadOnly="True" Text="{Binding FarFiles.Count}" />
             </Grid>
-            <Grid Grid.Row="2" ColumnDefinitions="*,*">
+            <Grid Grid.Row="2" ColumnDefinitions="*,4,*">
                 <Grid RowDefinitions="Auto,*">
                     <Grid ColumnDefinitions="*,*">
                         <Label Content="Files in archive" />
@@ -124,7 +124,8 @@
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
-                <Grid Grid.Column="1" RowDefinitions="Auto,*">
+                <GridSplitter Grid.Column="1" Background="LightGray" ResizeDirection="Columns"/>
+                <Grid Grid.Column="2" RowDefinitions="Auto,*">
                     <Label Content="Selected Entry Data" />
                     <avaloniaHex:HexEditor Grid.Row="1" x:Name="MainHexEditor" FontFamily="Courier New"
                                            Document="{Binding SelectedFarFileVm, Converter={StaticResource FarFileVmConverter}, ConverterParameter='data'}">
