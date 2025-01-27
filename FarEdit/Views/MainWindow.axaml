@@ -9,6 +9,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="FarEdit.Views.MainWindow"
         x:DataType="mainWindowViewModel:MainWindowViewModel"
+        KeyDown="InputElement_OnKeyDown"
         Title="FarEdit">
 
     <Design.DataContext>
@@ -28,7 +29,7 @@
         </Style>
     </Window.Styles>
 
-    <DockPanel x:Name="DockPanel" KeyDown="DockPanel_OnKeyDown">
+    <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
                 <MenuItem x:Name="OpenMenuItem" Header="_Open" Command="{Binding OpenFileCmd}" />

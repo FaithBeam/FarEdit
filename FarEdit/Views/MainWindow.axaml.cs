@@ -121,7 +121,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         vm.SelectedFarFiles?.AddRange(dg.SelectedItems.Cast<FarFileVm>());
     }
 
-    private void DockPanel_OnKeyDown(object? sender, KeyEventArgs e)
+    private void InputElement_OnKeyDown(object? sender, KeyEventArgs e)
     {
         switch (e)
         {
