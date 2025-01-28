@@ -51,7 +51,6 @@
                 </MenuItem>
                 <MenuItem x:Name="MenuItemExit" Header="_Exit" Click="MenuItemExit_OnClick" />
             </MenuItem>
-            <MenuItem Header="_Entries" />
         </Menu>
         <Grid RowDefinitions="Auto,Auto,*">
             <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">

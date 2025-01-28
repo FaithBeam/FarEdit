@@ -4,6 +4,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
 using DynamicData.Binding;
+using FarEdit.Core.ViewModels.Dialogs.YesNoDialog;
 using FarEdit.Core.ViewModels.MainWindowViewModel.Commands;
 using FarEdit.Core.ViewModels.MainWindowViewModel.Models;
 using FarEdit.Core.ViewModels.MainWindowViewModel.Queries;
@@ -46,6 +47,7 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, List<FarFileVm>> AddEntriesCommand { get; }
     public IInteraction<Unit, List<string>> AddEntriesInteraction { get; }
     public ReactiveCommand<IList<FarFileVm>, Unit> RemoveEntriesCmd { get; }
+    public IInteraction<Unit, YesNoDialogResponse> RemoveEntriesInteraction { get; }
     public ReactiveCommand<Unit, string?> NewFileCmd { get; }
     public IInteraction<Unit, string?> NewFileInteraction { get; }
 
@@ -175,9 +177,15 @@ public class MainWindowViewModel : ViewModelBase
         );
         AddEntriesCommand.Subscribe(x => entrySc.AddOrUpdate(x));
 
-        RemoveEntriesCmd = ReactiveCommand.Create<IList<FarFileVm>>(entriesToRemove =>
-            entrySc.Remove(entriesToRemove)
-        );
+        RemoveEntriesInteraction = new Interaction<Unit, YesNoDialogResponse>();
+        RemoveEntriesCmd = ReactiveCommand.CreateFromTask<IList<FarFileVm>>(async entriesToRemove =>
+        {
+            var response = await RemoveEntriesInteraction.Handle(Unit.Default);
+            if (response.Result)
+            {
+                entrySc.Remove(entriesToRemove);
+            }
+        });
 
         NewFileInteraction = new Interaction<Unit, string?>();
         NewFileCmd = ReactiveCommand.CreateFromTask<string?>(
