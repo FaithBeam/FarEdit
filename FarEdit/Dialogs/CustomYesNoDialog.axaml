@@ -10,7 +10,8 @@
         MinHeight="100"
         WindowStartupLocation="CenterOwner"
         SizeToContent="WidthAndHeight"
-        Title="Delete Entries">
+        CanResize="False"
+        Title="{Binding Title}">
     <Design.DataContext>
         <yesNoDialog:CustomYesNoDialogViewModel />
     </Design.DataContext>
