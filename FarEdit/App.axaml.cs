@@ -41,15 +41,10 @@ public partial class App : Application
 
     private void Init()
     {
-        // var configuration = new ConfigurationBuilder()
-        //     .SetBasePath(AppContext.BaseDirectory)
-        //     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-        //     .Build();
         var host = Host.CreateDefaultBuilder()
             .ConfigureServices(services =>
             {
                 services.UseMicrosoftDependencyResolver();
-                // services.AddScoped(_ => configuration);
 
                 var resolver = Locator.CurrentMutable;
                 resolver.InitializeSplat();
