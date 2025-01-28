@@ -114,7 +114,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             {
                 Title = "Select .far file",
                 AllowMultiple = false,
-                FileTypeFilter = [new FilePickerFileType(".far") { Patterns = [".far"] }],
+                FileTypeFilter = [new FilePickerFileType(".far") { Patterns = ["*.far"] }],
             }
         );
         ctx.SetOutput(result.Any() ? result[0].TryGetLocalPath() : string.Empty);
