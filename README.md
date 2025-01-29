@@ -30,4 +30,4 @@ sudo apt-get install -y dotnet-runtime-9.0
 
 ## Usage
 
-Download the latest release for your platform from the [Releases page](https://github.com/FaithBeam/FarEdit/releases).
+Download the latest release for your platform from the [Releases page](https://github.com/FaithBeam/FarEdit/releases) and run FarEdit.exe.
