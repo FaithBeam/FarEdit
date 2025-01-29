@@ -42,6 +42,7 @@ public class MainWindowViewModel : ViewModelBase
         string?
     > SaveAsCommand { get; }
     public IInteraction<string, string?> SaveAsInteraction { get; }
+    public IInteraction<Unit, Unit> SavedInteraction { get; }
     public ReactiveCommand<IList<FarFileVm>, Unit> ExportCommand { get; }
     public IInteraction<Unit, string?> ExportInteraction { get; }
     public ReactiveCommand<Unit, List<FarFileVm>> AddEntriesCommand { get; }
@@ -58,6 +59,7 @@ public class MainWindowViewModel : ViewModelBase
         GetFarFilesFromPaths.Handler getFarFilesFromPathsHandler
     )
     {
+        SavedInteraction = new Interaction<Unit, Unit>();
         SelectedFarFiles = [];
         var selectedFarFilesChangedObs = Observable.FromEventPattern<
             NotifyCollectionChangedEventHandler,
@@ -119,8 +121,15 @@ public class MainWindowViewModel : ViewModelBase
             x => x.FarPath,
             selector: farPath => !string.IsNullOrWhiteSpace(farPath)
         );
-        SaveCommand = ReactiveCommand.Create<(string, ReadOnlyObservableCollection<FarFileVm>)>(
-            tuple => saveHandler.Execute(new SaveFar.Command(tuple.Item1, tuple.Item2)),
+        SaveCommand = ReactiveCommand.CreateFromTask<(
+            string,
+            ReadOnlyObservableCollection<FarFileVm>
+        )>(
+            async tuple =>
+            {
+                saveHandler.Execute(new SaveFar.Command(tuple.Item1, tuple.Item2));
+                await SavedInteraction.Handle(Unit.Default);
+            },
             canSave
         );
 

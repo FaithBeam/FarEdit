@@ -1,0 +1,18 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="FarEdit.Dialogs.SavedDialog"
+        SizeToContent="WidthAndHeight"
+        MinWidth="120"
+        MinHeight="50"
+        CanResize="False"
+        Title="Saved">
+    <Grid RowDefinitions="*,Auto">
+        <TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center">
+            Saved!
+        </TextBlock>
+        <Button x:Name="OkBtn" Grid.Row="1" Content="Ok" Click="OkBtn_OnClick" HorizontalAlignment="Center" />
+    </Grid>
+</Window>

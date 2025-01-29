@@ -37,7 +37,18 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             ViewModel.AddEntriesInteraction.RegisterHandler(ShowAddEntriesDialog).DisposeWith(d);
             ViewModel.NewFileInteraction.RegisterHandler(ShowNewFileDialog).DisposeWith(d);
             ViewModel.RemoveEntriesInteraction.RegisterHandler(RemoveEntriesDialog).DisposeWith(d);
+            ViewModel.SavedInteraction.RegisterHandler(ShowSavedNotification).DisposeWith(d);
         });
+    }
+
+    private async Task ShowSavedNotification(IInteractionContext<Unit, Unit> ctx)
+    {
+        var dialog = new SavedDialog();
+        {
+            Title = "Saved!";
+        }
+        await dialog.ShowDialog(this);
+        ctx.SetOutput(Unit.Default);
     }
 
     private async Task RemoveEntriesDialog(IInteractionContext<Unit, YesNoDialogResponse> ctx)
