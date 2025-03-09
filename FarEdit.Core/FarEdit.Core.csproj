@@ -15,15 +15,19 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="DynamicData" Version="9.1.1" />
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
-      <PackageReference Include="ReactiveUI" Version="20.1.1" />
-      <PackageReference Include="Sims.Far" Version="4.0.0" />
+      <PackageReference Include="DynamicData" Version="9.1.2" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.2" />
+      <PackageReference Include="ReactiveUI" Version="20.1.63" />
+      <PackageReference Include="Sims.Far" Version="4.2.2" />
+<!--      <PackageReference Include="Sims.Far" Version="4.0.0" />-->
     </ItemGroup>
 
     <ItemGroup>
       <Reference Include="Avalonia.Base">
         <HintPath>..\FarEdit\bin\Debug\net9.0\Avalonia.Base.dll</HintPath>
+      </Reference>
+      <Reference Include="Sims.Far">
+        <HintPath>..\..\Sims.Far\Sims.Far\bin\Debug\net9.0\Sims.Far.dll</HintPath>
       </Reference>
     </ItemGroup>
 

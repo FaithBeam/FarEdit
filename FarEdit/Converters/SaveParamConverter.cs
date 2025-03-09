@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using Avalonia.Data.Converters;
 using FarEdit.Core.ViewModels.MainWindowViewModel.Models;
+using Sims.Far;
 
 namespace FarEdit.Converters;
 
@@ -16,7 +17,7 @@ public class SaveParamConverter : IMultiValueConverter
         CultureInfo culture
     )
     {
-        if (values.Count != 2)
+        if (values.Count != 3)
         {
             return null;
         }
@@ -24,6 +25,7 @@ public class SaveParamConverter : IMultiValueConverter
         if (
             values[0] is not string path
             || values[1] is not ReadOnlyObservableCollection<FarFileVm> files
+            || values[2] is not FarVersion farVersion
         )
         {
             return null;
@@ -34,6 +36,6 @@ public class SaveParamConverter : IMultiValueConverter
             return null;
         }
 
-        return (path, files);
+        return (path, files, farVersion);
     }
 }

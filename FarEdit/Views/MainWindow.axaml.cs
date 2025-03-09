@@ -15,6 +15,7 @@ using FarEdit.Core.ViewModels.MainWindowViewModel;
 using FarEdit.Core.ViewModels.MainWindowViewModel.Models;
 using FarEdit.Dialogs;
 using ReactiveUI;
+using Sims.Far;
 
 namespace FarEdit.Views;
 
@@ -73,7 +74,11 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             new FilePickerSaveOptions
             {
                 Title = "New File",
-                FileTypeChoices = [new FilePickerFileType("*.far") { Patterns = ["*.far"] }],
+                FileTypeChoices =
+                [
+                    new FilePickerFileType("*.far") { Patterns = ["*.far"] },
+                    new FilePickerFileType("*.dat") { Patterns = ["*.dat"] },
+                ],
             }
         );
         ctx.SetOutput(result?.TryGetLocalPath());
@@ -125,7 +130,10 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             {
                 Title = "Select .far file",
                 AllowMultiple = false,
-                FileTypeFilter = [new FilePickerFileType(".far") { Patterns = ["*.far"] }],
+                FileTypeFilter =
+                [
+                    new FilePickerFileType(".far|.dat") { Patterns = ["*.far", "*.dat"] },
+                ],
             }
         );
         ctx.SetOutput(result.Any() ? result[0].TryGetLocalPath() : string.Empty);
@@ -169,7 +177,10 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                 OpenMenuItem.Command?.Execute(Unit.Default);
                 break;
             case { Key: Key.S, KeyModifiers: KeyModifiers.Control }:
-                SaveBtn.Command?.Execute((ViewModel?.FarPath, ViewModel?.UnFilteredFarFiles));
+                if (ViewModel?.FarVm.Version != FarVersion._3)
+                {
+                    SaveBtn.Command?.Execute((ViewModel?.FarPath, ViewModel?.UnFilteredFarFiles));
+                }
                 break;
             case { Key: Key.N, KeyModifiers: KeyModifiers.Control }:
                 NewFarFileBtn.Command?.Execute(Unit.Default);
@@ -178,7 +189,10 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                 ExportEntriesBtn.Command?.Execute(ViewModel?.SelectedFarFiles);
                 break;
             case { Key: Key.Delete, KeyModifiers: KeyModifiers.Control }:
-                DeleteEntriesBtn.Command?.Execute(ViewModel?.SelectedFarFiles);
+                if (ViewModel?.FarVm.Version != FarVersion._3)
+                {
+                    DeleteEntriesBtn.Command?.Execute(ViewModel?.SelectedFarFiles);
+                }
                 break;
         }
     }

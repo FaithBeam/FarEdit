@@ -9,6 +9,7 @@ using FarEdit.Core.ViewModels.MainWindowViewModel.Commands;
 using FarEdit.Core.ViewModels.MainWindowViewModel.Models;
 using FarEdit.Core.ViewModels.MainWindowViewModel.Queries;
 using ReactiveUI;
+using Sims.Far;
 
 namespace FarEdit.Core.ViewModels.MainWindowViewModel;
 
@@ -16,6 +17,14 @@ public class MainWindowViewModel : ViewModelBase
 {
     public bool IsImage => _isImage.Value;
     public string? FarPath => _farPath?.Value;
+    public FarVm FarVm => _farVm.Value;
+
+    public FarVersion? SelectedVersion
+    {
+        get => _selectedVersion;
+        set => this.RaiseAndSetIfChanged(ref _selectedVersion, value);
+    }
+    public ObservableCollection<FarVersion> Versions { get; } = new(Enum.GetValues<FarVersion>());
 
     public FarFileVm? SelectedFarFileVm => _selectedFarFileVm.Value;
 
@@ -34,11 +43,11 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, string?> OpenFileCmd { get; }
     public IInteraction<Unit, string?> OpenFileInteraction { get; }
     public ReactiveCommand<
-        (string, ReadOnlyObservableCollection<FarFileVm>),
+        (string, ReadOnlyObservableCollection<FarFileVm>, FarVersion),
         Unit
     > SaveCommand { get; }
     public ReactiveCommand<
-        (string, ReadOnlyObservableCollection<FarFileVm>),
+        (string, ReadOnlyObservableCollection<FarFileVm>, FarVersion),
         string?
     > SaveAsCommand { get; }
     public IInteraction<string, string?> SaveAsInteraction { get; }
@@ -92,10 +101,17 @@ public class MainWindowViewModel : ViewModelBase
             .Filter(dynamicEntryFilter)
             .SortAndBind(out _farFiles, SortExpressionComparer<FarFileVm>.Ascending(x => x.Name))
             .Subscribe();
-        this.WhenAnyValue(x => x.FarPath)
+        _farVm = this.WhenAnyValue(x => x.FarPath)
             .WhereNotNull()
             .Where(File.Exists)
             .Select(x => getFarFilesHandler.Execute(new GetFarVm.Query(x)))
+            .ToProperty(this, x => x.FarVm);
+        this.WhenAnyValue(x => x.FarVm)
+            .WhereNotNull()
+            .Select(x => x.Version)
+            .Subscribe(x => SelectedVersion = x);
+        this.WhenAnyValue(x => x.FarVm)
+            .WhereNotNull()
             .Subscribe(x =>
                 entrySc.Edit(inner =>
                 {
@@ -119,15 +135,18 @@ public class MainWindowViewModel : ViewModelBase
 
         var canSave = this.WhenAnyValue(
             x => x.FarPath,
-            selector: farPath => !string.IsNullOrWhiteSpace(farPath)
+            property2: x => x.FarVm,
+            selector: (farPath, farVm) =>
+                !string.IsNullOrWhiteSpace(farPath) && farVm?.Version != FarVersion._3
         );
         SaveCommand = ReactiveCommand.CreateFromTask<(
             string,
-            ReadOnlyObservableCollection<FarFileVm>
+            ReadOnlyObservableCollection<FarFileVm>,
+            FarVersion
         )>(
             async tuple =>
             {
-                saveHandler.Execute(new SaveFar.Command(tuple.Item1, tuple.Item2));
+                saveHandler.Execute(new SaveFar.Command(tuple.Item1, tuple.Item2, tuple.Item3));
                 await SavedInteraction.Handle(Unit.Default);
             },
             canSave
@@ -136,10 +155,12 @@ public class MainWindowViewModel : ViewModelBase
         SaveAsInteraction = new Interaction<string, string?>();
         var canSaveAs = this.WhenAnyValue(
             x => x.FarPath,
-            selector: farPath => !string.IsNullOrWhiteSpace(farPath)
+            property2: x => x.FarVm,
+            selector: (farPath, farVm) =>
+                !string.IsNullOrWhiteSpace(farPath) && farVm?.Version != FarVersion._3
         );
         SaveAsCommand = ReactiveCommand.CreateFromTask<
-            (string, ReadOnlyObservableCollection<FarFileVm>),
+            (string, ReadOnlyObservableCollection<FarFileVm>, FarVersion),
             string?
         >(
             async tuple =>
@@ -149,7 +170,7 @@ public class MainWindowViewModel : ViewModelBase
                 {
                     return null;
                 }
-                saveHandler.Execute(new SaveFar.Command(dst, tuple.Item2));
+                saveHandler.Execute(new SaveFar.Command(dst, tuple.Item2, tuple.Item3));
                 return dst;
             },
             canSaveAs
@@ -174,7 +195,9 @@ public class MainWindowViewModel : ViewModelBase
         AddEntriesInteraction = new Interaction<Unit, List<string>>();
         var canAddEntries = this.WhenAnyValue(
             x => x.FarPath,
-            selector: farPath => !string.IsNullOrWhiteSpace(farPath)
+            x => x.FarVm,
+            selector: (farPath, farVm) =>
+                !string.IsNullOrWhiteSpace(farPath) && farVm?.Version != FarVersion._3
         );
         AddEntriesCommand = ReactiveCommand.CreateFromTask<List<FarFileVm>>(
             async () =>
@@ -187,14 +210,21 @@ public class MainWindowViewModel : ViewModelBase
         AddEntriesCommand.Subscribe(x => entrySc.AddOrUpdate(x));
 
         RemoveEntriesInteraction = new Interaction<Unit, YesNoDialogResponse>();
-        RemoveEntriesCmd = ReactiveCommand.CreateFromTask<IList<FarFileVm>>(async entriesToRemove =>
-        {
-            var response = await RemoveEntriesInteraction.Handle(Unit.Default);
-            if (response.Result)
+        var canRemoveEntries = this.WhenAnyValue(
+            x => x.FarVm,
+            selector: farVm => farVm?.Version != FarVersion._3
+        );
+        RemoveEntriesCmd = ReactiveCommand.CreateFromTask<IList<FarFileVm>>(
+            async entriesToRemove =>
             {
-                entrySc.Remove(entriesToRemove);
-            }
-        });
+                var response = await RemoveEntriesInteraction.Handle(Unit.Default);
+                if (response.Result)
+                {
+                    entrySc.Remove(entriesToRemove);
+                }
+            },
+            canRemoveEntries
+        );
 
         NewFileInteraction = new Interaction<Unit, string?>();
         NewFileCmd = ReactiveCommand.CreateFromTask<string?>(
@@ -212,6 +242,9 @@ public class MainWindowViewModel : ViewModelBase
         string.IsNullOrWhiteSpace(txt)
             ? _ => true
             : ffVm => ffVm.Name.Contains(txt, StringComparison.OrdinalIgnoreCase);
+
+    private readonly ObservableAsPropertyHelper<FarVm> _farVm;
+    private FarVersion? _selectedVersion;
 
     private readonly ObservableAsPropertyHelper<bool> _isImage;
     private readonly ReadOnlyObservableCollection<FarFileVm> _farFiles;

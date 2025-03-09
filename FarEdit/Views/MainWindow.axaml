@@ -19,6 +19,7 @@
     <Window.Resources>
         <converters:FarFileVmConverter x:Key="FarFileVmConverter" />
         <converters:SaveParamConverter x:Key="SaveParamConverter" />
+        <converters:FarVersionConverter x:Key="FarVersionConverter" />
     </Window.Resources>
 
     <Window.Styles>
@@ -38,6 +39,7 @@
                         <MultiBinding Converter="{StaticResource SaveParamConverter}">
                             <Binding Path="FarPath" />
                             <Binding Path="UnFilteredFarFiles" />
+                            <Binding Path="FarVm.Version" />
                         </MultiBinding>
                     </MenuItem.CommandParameter>
                 </MenuItem>
@@ -46,6 +48,7 @@
                         <MultiBinding Converter="{StaticResource SaveParamConverter}">
                             <Binding Path="FarPath" />
                             <Binding Path="UnFilteredFarFiles" />
+                            <Binding Path="FarVm.Version" />
                         </MultiBinding>
                     </MenuItem.CommandParameter>
                 </MenuItem>
@@ -71,6 +74,7 @@
                         <MultiBinding Converter="{StaticResource SaveParamConverter}">
                             <Binding Path="FarPath" />
                             <Binding Path="UnFilteredFarFiles" />
+                            <Binding Path="FarVm.Version" />
                         </MultiBinding>
                     </MenuItem.CommandParameter>
                     <Image Source="/Assets/icons8-save-100.png" />
@@ -91,7 +95,8 @@
                         <TextBlock>Add entries</TextBlock>
                     </ToolTip.Tip>
                 </Button>
-                <Button x:Name="DeleteEntriesBtn" Grid.Column="5" Classes="btn-img" Command="{Binding RemoveEntriesCmd}" CommandParameter="{Binding SelectedFarFiles}">
+                <Button x:Name="DeleteEntriesBtn" Grid.Column="5" Classes="btn-img"
+                        Command="{Binding RemoveEntriesCmd}" CommandParameter="{Binding SelectedFarFiles}">
                     <Image Source="/Assets/icons8-delete-document-96.png" />
                     <ToolTip.Tip>
                         <TextBlock>Delete entries (CTRL+DEL)</TextBlock>
@@ -100,7 +105,12 @@
             </Grid>
             <Grid Grid.Row="1" RowDefinitions="*,*" ColumnDefinitions="*,*">
                 <Label Grid.Row="0" Grid.Column="0" Content="Current Far File" />
-                <TextBox Grid.Row="1" Grid.Column="0" IsReadOnly="True" Text="{Binding FarPath, Mode=OneWay}" />
+                <Grid Grid.Row="1" Grid.Column="0" ColumnDefinitions="*,Auto">
+                    <TextBox Grid.Column="0" IsReadOnly="True" Text="{Binding FarPath, Mode=OneWay}" />
+                    <ComboBox Grid.Column="1" IsEnabled="False"
+                              ItemsSource="{Binding Versions, Converter={StaticResource FarVersionConverter}}"
+                              SelectedItem="{Binding SelectedVersion, Converter={StaticResource FarVersionConverter}}" />
+                </Grid>
 
                 <Label Grid.Row="0" Grid.Column="1" Content="Entries" />
                 <TextBox Grid.Row="1" Grid.Column="1" IsReadOnly="True" Text="{Binding FarFiles.Count}" />
@@ -123,7 +133,7 @@
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
-                <GridSplitter Grid.Column="1" Background="LightGray" ResizeDirection="Columns"/>
+                <GridSplitter Grid.Column="1" Background="LightGray" ResizeDirection="Columns" />
                 <Grid Grid.Column="2" RowDefinitions="Auto,*">
                     <Label Content="Selected Entry Data" />
                     <avaloniaHex:HexEditor Grid.Row="1" x:Name="MainHexEditor" FontFamily="Courier New"
